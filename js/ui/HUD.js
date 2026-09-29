@@ -16,6 +16,8 @@ export class HUD {
     this.scoreValEl = null;
     this.boardEl = null;
     this.restartBtn = null;
+    this.bgmToggleBtn = null;
+    this.sfxToggleBtn = null;
   }
 
   /**
@@ -55,7 +57,9 @@ export class HUD {
         </div>
 
         <div class="controls-row">
-          <button id="restartBtn">🔄 一鍵重新開始</button>
+          <button id="restartBtn">🔄 重新開始</button>
+          <button id="bgmToggleBtn" class="audio-btn" title="切換背景白噪音">🎵 白噪音: 開</button>
+          <button id="sfxToggleBtn" class="audio-btn" title="切換點擊與勝負音效">🔊 音效: 開</button>
         </div>
 
         <p class="hint">左鍵翻開・右鍵（長按）插旗・點擊數字快速展開 🎗️</p>
@@ -70,6 +74,22 @@ export class HUD {
     this.scoreValEl = this.root.querySelector('#scoreVal');
     this.boardEl = this.root.querySelector('#board');
     this.restartBtn = this.root.querySelector('#restartBtn');
+    this.bgmToggleBtn = this.root.querySelector('#bgmToggleBtn');
+    this.sfxToggleBtn = this.root.querySelector('#sfxToggleBtn');
+  }
+
+  /**
+   * 更新音訊開關按鈕顯示狀態
+   */
+  updateAudioButtons(bgmEnabled, sfxEnabled) {
+    if (this.bgmToggleBtn) {
+      this.bgmToggleBtn.textContent = bgmEnabled ? '🎵 白噪音: 開' : '🎵 白噪音: 關';
+      this.bgmToggleBtn.classList.toggle('off', !bgmEnabled);
+    }
+    if (this.sfxToggleBtn) {
+      this.sfxToggleBtn.textContent = sfxEnabled ? '🔊 音效: 開' : '🔇 音效: 關';
+      this.sfxToggleBtn.classList.toggle('off', !sfxEnabled);
+    }
   }
 
   /**

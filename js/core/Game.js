@@ -4,6 +4,7 @@ import { InputHandler } from './InputHandler.js';
 import { Player } from '../entities/Player.js';
 import { ObstacleManager } from '../entities/ObstacleManager.js';
 import { ParticleSystem } from '../systems/ParticleSystem.js';
+import { AudioManager } from '../systems/AudioManager.js';
 import { HUD } from '../ui/HUD.js';
 
 /**
@@ -20,6 +21,7 @@ export class Game {
     // 子系統與實體實例化
     this.player = new Player();
     this.obstacleManager = new ObstacleManager();
+    this.audioManager = new AudioManager();
 
     this.containerEl = document.getElementById('game-container');
     this.canvasEl = document.getElementById('fx-canvas');
@@ -52,8 +54,44 @@ export class Game {
       diffRowElement: this.hud.diffRowEl,
     });
 
+    // 綁定音訊開關按鈕與狀態
+    this.bindAudioEvents();
+    this.hud.updateAudioButtons(this.audioManager.bgmEnabled, this.audioManager.sfxEnabled);
+
+    // 首次使用者點擊/手勢互動解鎖音訊上下文與白噪音
+    const unlockAudio = () => {
+      this.audioManager.ensureContextRunning();
+      document.removeEventListener('pointerdown', unlockAudio);
+      document.removeEventListener('keydown', unlockAudio);
+    };
+    document.addEventListener('pointerdown', unlockAudio, { once: true });
+    document.addEventListener('keydown', unlockAudio, { once: true });
+
     this.gameLoop.start();
     this.restart();
+  }
+
+  /**
+   * 綁定音訊介面控制事件
+   */
+  bindAudioEvents() {
+    if (this.hud.bgmToggleBtn) {
+      this.hud.bgmToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const enabled = this.audioManager.toggleBGM();
+        this.hud.updateAudioButtons(enabled, this.audioManager.sfxEnabled);
+        this.audioManager.playClick('reveal');
+      });
+    }
+
+    if (this.hud.sfxToggleBtn) {
+      this.hud.sfxToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const enabled = this.audioManager.toggleSFX();
+        this.hud.updateAudioButtons(this.audioManager.bgmEnabled, enabled);
+        if (enabled) this.audioManager.playClick('flag');
+      });
+    }
   }
 
   /**
@@ -75,6 +113,10 @@ export class Game {
     this.timer = 0;
     clearInterval(this.timerInterval);
     this.timerInterval = null;
+
+    if (this.audioManager && this.audioManager.isInitialized) {
+      this.audioManager.playClick('reveal');
+    }
 
     this.player.reset();
     this.obstacleManager.initGrid(config.rows, config.cols, config.bows);
@@ -119,12 +161,14 @@ export class Game {
       if (chordResult.performed) {
         if (chordResult.hit) {
           // 標記錯誤踩爆蝴蝶結
+          this.audioManager.playDefeat();
           const hitCell = this.obstacleManager.getCell(chordResult.hitRow, chordResult.hitCol);
           this.triggerBowExplosion(hitCell.element);
           this.obstacleManager.revealAllBows(chordResult.hitRow, chordResult.hitCol);
           this.endGame(false);
           return;
         }
+        this.audioManager.playClick('chord');
         this.checkWin();
         this.renderAllCells();
       }
@@ -141,6 +185,7 @@ export class Game {
 
     // 踩雷判定
     if (cell.isBow) {
+      this.audioManager.playDefeat();
       this.triggerBowExplosion(cellElement);
       this.obstacleManager.revealAllBows(r, c);
       this.endGame(false);
@@ -148,6 +193,7 @@ export class Game {
     }
 
     // 安全格泛洪展開
+    this.audioManager.playClick('reveal');
     this.obstacleManager.floodReveal(r, c, this.player);
     this.checkWin();
     this.renderAllCells();
@@ -162,7 +208,10 @@ export class Game {
     const cell = this.obstacleManager.getCell(r, c);
     if (!cell) return;
 
-    this.player.toggleFlag(cell, this.obstacleManager.bowCount);
+    const flagResult = this.player.toggleFlag(cell, this.obstacleManager.bowCount);
+    if (flagResult !== null) {
+      this.audioManager.playClick('flag');
+    }
     this.updateStats();
   }
 
@@ -196,11 +245,13 @@ export class Game {
     this.timerInterval = null;
 
     if (isWin) {
+      this.audioManager.playVictory();
       const bonus = this.player.addWinBonus(this.timer);
       this.hud.showBanner('win', `🎉 太棒了！全部蝴蝶結都找出來了！ +${bonus} 分獎勵`);
       this.obstacleManager.flagAllBows();
       this.particleSystem.triggerWinConfetti();
     } else {
+      this.audioManager.playDefeat();
       this.hud.showBanner('lose', '💔 踩到蝴蝶結了，再試一次吧！');
     }
 
