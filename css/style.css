@@ -81,6 +81,51 @@ body {
   pointer-events: none;
 }
 
+/* 遊戲右上角作者小標籤 */
+.author-tag {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, rgba(255, 240, 246, 0.95), rgba(255, 249, 252, 0.95));
+  border: 1.5px solid #FFD4E5;
+  border-radius: 20px;
+  padding: 3px 10px 3px 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--pink-deep);
+  box-shadow: 0 2px 8px -2px rgba(255, 107, 152, 0.25);
+  user-select: none;
+  z-index: 5;
+  transition: transform .15s ease, box-shadow .15s ease;
+  backdrop-filter: blur(4px);
+}
+
+.author-tag:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 12px -2px rgba(255, 107, 152, 0.35);
+}
+
+.author-bow {
+  font-size: 13px;
+  line-height: 1;
+  display: inline-block;
+  animation: bowBob 3.5s ease-in-out infinite;
+}
+
+@keyframes bowBob {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-7deg); }
+  75% { transform: rotate(7deg); }
+}
+
+.author-name {
+  letter-spacing: 0.3px;
+}
+
 h1 {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 800;

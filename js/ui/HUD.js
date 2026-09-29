@@ -26,6 +26,10 @@ export class HUD {
   mount() {
     this.root.innerHTML = `
       <div class="game-card">
+        <div class="author-tag" title="遊戲作者：小小">
+          <span class="author-bow">🎀</span>
+          <span class="author-name">作者：小小</span>
+        </div>
         <h1>🎀 蝴蝶結踩地雷</h1>
         <p class="subtitle">小心翻開，蝴蝶結藏在格子裡呦～</p>
 
