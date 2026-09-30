@@ -1,21 +1,255 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>蝴蝶結踩地雷 - 20x20 特效版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>蝴蝶結踩地雷 - 20x20 特效版 (庫洛米 Kuromi 主題)</title>
+  <meta name="description" content="蝴蝶結踩地雷 - 20x20 特效版，庫洛米 Kuromi 風格，包含關卡選擇、聲音開關、庫洛米頭像與骷顱頭標記，創作者：小小">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 畫布節點容器 -->
-  <div id="game-app">
-    <canvas id="fx-canvas"></canvas>
-    <div id="game-container"></div>
+  <!-- 背景飄落蝴蝶結與魔法粒子 -->
+  <div id="particle-container"></div>
+
+  <div id="app">
+    <!-- 主頁面 (Home Screen) -->
+    <section id="home-screen" class="screen active">
+      <div class="home-card glass-panel">
+        <div class="logo-badge">
+          <img src="assets/kuromi_bow.jpg" alt="Bow Ribbon" class="logo-icon pulse-anim">
+          <span class="badge-tag">20x20 特效版</span>
+        </div>
+        <h1 class="game-title">蝴蝶結踩地雷</h1>
+        <p class="game-subtitle">🖤 庫洛米 Kuromi 夢幻掃雷大作戰 💖</p>
+        
+        <div class="creator-badge">
+          <span class="sparkle">✨</span> 創作者：<strong>小小</strong> <span class="sparkle">✨</span>
+        </div>
+
+        <div class="level-select-box">
+          <h2>選擇遊戲關卡</h2>
+          <div class="level-grid">
+            <button class="level-btn" data-level="easy">
+              <div class="level-icon">🌸</div>
+              <div class="level-info">
+                <span class="level-name">初級關卡</span>
+                <span class="level-detail">9 × 9 (10 地雷)</span>
+              </div>
+            </button>
+
+            <button class="level-btn" data-level="medium">
+              <div class="level-icon">🎀</div>
+              <div class="level-info">
+                <span class="level-name">中級關卡</span>
+                <span class="level-detail">16 × 16 (40 地雷)</span>
+              </div>
+            </button>
+
+            <button class="level-btn special-level" data-level="hard">
+              <div class="special-glow"></div>
+              <div class="level-icon">☠️</div>
+              <div class="level-info">
+                <span class="level-name">20×20 特效版</span>
+                <span class="level-detail">20 × 20 (80 地雷 + 滿版特效)</span>
+              </div>
+            </button>
+
+            <button class="level-btn" data-level="custom">
+              <div class="level-icon">⚙️</div>
+              <div class="level-info">
+                <span class="level-name">自訂關卡</span>
+                <span class="level-detail">自由設定行列與雷數</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="btn-sound-settings" class="btn secondary-btn">
+            <span class="btn-icon">🔊</span> 聲音設定
+          </button>
+          <button id="btn-instructions" class="btn secondary-btn">
+            <span class="btn-icon">📖</span> 遊戲規則
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 遊戲畫面 (Game Screen) -->
+    <section id="game-screen" class="screen">
+      <header class="game-header glass-panel">
+        <button id="btn-back-home" class="icon-btn" title="回到主畫面">
+          <span>🏠</span> 主畫面
+        </button>
+
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-label">模式</span>
+            <span id="display-mode" class="status-value">20x20 特效版</span>
+          </div>
+
+          <div class="status-item">
+            <span class="status-label">剩餘地雷</span>
+            <span id="mine-count" class="status-value highlight-pink">080</span>
+          </div>
+
+          <div class="status-item">
+            <span class="status-label">時間</span>
+            <span id="timer" class="status-value">00:00</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button id="btn-quick-sound" class="icon-btn" title="切換聲音">
+            <span id="quick-sound-icon">🔊</span>
+          </button>
+          <button id="btn-restart" class="icon-btn primary-icon-btn" title="重新開始">
+            <span>🔄</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="game-body">
+        <div class="board-wrapper glass-panel">
+          <div id="minesweeper-board" class="board"></div>
+        </div>
+
+        <div class="game-footer-info">
+          <span>創作者：小小</span> • <span>標記：庫洛米骷顱頭 ☠️</span> • <span>點擊：庫洛米頭像 🌸</span>
+        </div>
+      </main>
+    </section>
   </div>
 
-  <!-- Module 入口 -->
-  <script type="module" src="js/main.js"></script>
+  <!-- 聲音設定 Modal -->
+  <div id="sound-modal" class="modal-overlay">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3>🔊 聲音與音樂設定</h3>
+        <button class="modal-close" data-close="sound-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">🎵 背景音樂 (BGM)</span>
+            <span class="setting-desc">播放庫洛米夢幻主題旋律</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-bgm" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">🔔 點擊與遊戲音效 (SFX)</span>
+            <span class="setting-desc">翻開方格、放置標記與爆破聲</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-sfx" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">🎚️ 音量控制</span>
+          </div>
+          <input type="range" id="volume-range" min="0" max="100" value="70" class="volume-slider">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-test-sound" class="btn secondary-btn">試聽點擊聲</button>
+        <button class="btn primary-btn" data-close="sound-modal">完成儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自訂關卡 Modal -->
+  <div id="custom-modal" class="modal-overlay">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3>⚙️ 自訂遊戲關卡</h3>
+        <button class="modal-close" data-close="custom-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="custom-input-group">
+          <label for="custom-rows">行數 (Rows: 8-30):</label>
+          <input type="number" id="custom-rows" min="8" max="30" value="20">
+        </div>
+        <div class="custom-input-group">
+          <label for="custom-cols">列數 (Cols: 8-30):</label>
+          <input type="number" id="custom-cols" min="8" max="30" value="20">
+        </div>
+        <div class="custom-input-group">
+          <label for="custom-mines">地雷數量 (Mines: 1-200):</label>
+          <input type="number" id="custom-mines" min="1" max="200" value="80">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary-btn" data-close="custom-modal">取消</button>
+        <button id="btn-start-custom" class="btn primary-btn">開始自訂關卡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 遊戲說明 Modal -->
+  <div id="instructions-modal" class="modal-overlay">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3>📖 蝴蝶結踩地雷 遊戲規則</h3>
+        <button class="modal-close" data-close="instructions-modal">&times;</button>
+      </div>
+      <div class="modal-body instructions-text">
+        <p>1. <strong>目的：</strong>翻開所有不含地雷的粉色蝴蝶結方格！</p>
+        <p>2. <strong>點擊翻開：</strong>點擊未翻開方格，翻開後呈現可愛的<strong>庫洛米頭像 🌸</strong> 與週邊地雷數量。</p>
+        <p>3. <strong>標記地雷：</strong>使用<strong>滑鼠右鍵</strong>或<strong>手機長按</strong>，放置<strong>庫洛米骷顱頭 ☠️</strong> 標記你懷疑是地雷的位置。</p>
+        <p>4. <strong>20×20 特效版：</strong>經典 20×20 棋盤與 80 顆地雷，成功過關或踩爆時會有滿版夢幻酷炫特效！</p>
+        <p class="credit-highlight">💖 創作者：小小</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn primary-btn" data-close="instructions-modal">我明白了，開始玩！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 遊戲結束 Modal (成功/失敗) -->
+  <div id="game-over-modal" class="modal-overlay">
+    <div class="modal-content glass-panel result-card">
+      <div id="game-over-icon" class="result-icon">🎉</div>
+      <h2 id="game-over-title" class="result-title">成功過關！</h2>
+      <p id="game-over-desc" class="result-desc">太厲害了！你完美掃除了所有地雷！</p>
+      
+      <div class="result-stats">
+        <div class="stat-box">
+          <span class="stat-label">挑戰耗時</span>
+          <span id="result-time" class="stat-value">01:23</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">遊戲難度</span>
+          <span id="result-mode" class="stat-value">20x20 特效版</span>
+        </div>
+      </div>
+
+      <div class="creator-footer">
+        <span>創作者：小小</span>
+      </div>
+
+      <div class="result-actions">
+        <button id="btn-result-home" class="btn secondary-btn">
+          <span>🏠</span> 回到主畫面
+        </button>
+        <button id="btn-result-restart" class="btn primary-btn">
+          <span>🔄</span> 再試一次
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
